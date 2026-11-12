@@ -49,134 +49,172 @@ export default function App() {
   const [status, setStatus] = useState('')
 
   useLayoutEffect(() => {
-    const mm = gsap.matchMedia()
+    const ctx = gsap.context(() => {
+      if (prefersReducedMotion()) return
 
-    mm.add(
-      { motion: '(prefers-reduced-motion: no-preference)', desktop: '(min-width: 900px)' },
-      (context) => {
-        if (!context.conditions.motion) return
-        const root = rootRef.current
-        if (!root) return
+      const root = rootRef.current
+      if (!root) return
 
-        const { desktop } = context.conditions
+      const mm = gsap.matchMedia()
 
-        const heroTimeline = gsap.timeline({ defaults: { ease: 'power3.out' } })
-        heroTimeline
-          .from('.hero-kicker', { autoAlpha: 0, y: 14, duration: 0.7 }, 0.1)
-          .from(
-            '.hero-title .line',
-            { autoAlpha: 0, yPercent: 55, duration: 1.1, stagger: 0.12 },
-            0.2,
-          )
-          .from('.hero-copy', { autoAlpha: 0, y: 18, duration: 0.8 }, 0.72)
-          .from('.hero-actions', { autoAlpha: 0, y: 18, duration: 0.75 }, 0.88)
-          .from('.hero-foot', { autoAlpha: 0, y: 12, duration: 0.7 }, 1.05)
-          .from(
-            '.hero-scene-sun',
-            { autoAlpha: 0, y: 30, scale: 0.96, transformOrigin: '50% 50%', duration: 1.6 },
-            0.15,
-          )
-          .from('.hero-devotee', { autoAlpha: 0, y: 16, duration: 0.9, stagger: 0.12 }, 0.85)
-          .from('.hero-diyo', { autoAlpha: 0, y: 8, duration: 0.8, stagger: 0.09 }, 0.95)
+      mm.add(
+        { motion: '(prefers-reduced-motion: no-preference)', desktop: '(min-width: 900px)' },
+        (context) => {
+          if (!context.conditions.motion) return
+          const { desktop } = context.conditions
 
-        if (desktop) {
-          gsap.to('.hero-scene', {
+          // ---- Hero entrance timeline (unchanged, core magic) ----
+          const heroTimeline = gsap.timeline({ defaults: { ease: 'power3.out' } })
+          heroTimeline
+            .from('.hero-kicker', { autoAlpha: 0, y: 14, duration: 0.7 }, 0.1)
+            .from(
+              '.hero-title .line',
+              { autoAlpha: 0, yPercent: 55, duration: 1.1, stagger: 0.12 },
+              0.2,
+            )
+            .from('.hero-copy', { autoAlpha: 0, y: 18, duration: 0.8 }, 0.72)
+            .from('.hero-actions', { autoAlpha: 0, y: 18, duration: 0.75 }, 0.88)
+            .from('.hero-foot', { autoAlpha: 0, y: 12, duration: 0.7 }, 1.05)
+            .from(
+              '.hero-scene-sun',
+              { autoAlpha: 0, y: 30, scale: 0.96, transformOrigin: '50% 50%', duration: 1.6 },
+              0.15,
+            )
+            .from('.hero-devotee', { autoAlpha: 0, y: 16, duration: 0.9, stagger: 0.12 }, 0.85)
+            .from('.hero-diyo', { autoAlpha: 0, y: 8, duration: 0.8, stagger: 0.09 }, 0.95)
+
+          // Desktop: scroll-linked y-parallax on hero scene & main (unchanged)
+          if (desktop) {
+            gsap.to('.hero-scene', {
+              ease: 'none',
+              scrollTrigger: {
+                end: 'bottom top',
+                scrub: true,
+                start: 'top top',
+                trigger: '.hero',
+              },
+              yPercent: 7,
+            })
+
+            gsap.to('.hero-main', {
+              ease: 'none',
+              scrollTrigger: {
+                end: 'bottom top',
+                scrub: true,
+                start: 'top top',
+                trigger: '.hero',
+              },
+              yPercent: -5,
+            })
+          }
+
+          // ---- Scroll-reveal per-element triggers (unchanged) ----
+          root.querySelectorAll('[data-reveal]').forEach((element) => {
+            gsap.from(element, {
+              autoAlpha: 0,
+              duration: 0.95,
+              ease: 'power2.out',
+              scrollTrigger: { once: true, start: 'top 88%', trigger: element },
+              y: 30,
+            })
+          })
+
+          root.querySelectorAll('[data-reveal-group]').forEach((group) => {
+            const items = group.querySelectorAll('[data-reveal-item]')
+            if (!items.length) return
+
+            gsap.from(items, {
+              autoAlpha: 0,
+              duration: 0.82,
+              ease: 'power2.out',
+              scrollTrigger: { once: true, start: 'top 86%', trigger: group },
+              stagger: 0.09,
+              y: 26,
+            })
+          })
+
+          // ---- Chhath sun scroll ----
+          gsap.to('.chhath-sun', {
             ease: 'none',
             scrollTrigger: {
               end: 'bottom top',
               scrub: true,
-              start: 'top top',
-              trigger: '.hero',
+              start: 'top bottom',
+              trigger: '#chhath',
             },
-            yPercent: 7,
+            yPercent: -6,
           })
 
-          gsap.to('.hero-main', {
-            ease: 'none',
+          // ---- Between section: scroll-driven sun/mist/wash transition ----
+          const betweenTimeline = gsap.timeline({
             scrollTrigger: {
-              end: 'bottom top',
-              scrub: true,
-              start: 'top top',
-              trigger: '.hero',
+              end: 'bottom 55%',
+              scrub: 0.6,
+              start: 'top 78%',
+              trigger: '#between',
             },
-            yPercent: -5,
           })
-        }
 
-        root.querySelectorAll('[data-reveal]').forEach((element) => {
-          gsap.from(element, {
-            autoAlpha: 0,
-            duration: 0.95,
-            ease: 'power2.out',
-            scrollTrigger: { once: true, start: 'top 88%', trigger: element },
-            y: 30,
-          })
-        })
+          betweenTimeline
+            .fromTo('.dawn-wash', { opacity: 1 }, { ease: 'none', opacity: 0 }, 0)
+            .fromTo('.night-wash', { opacity: 0 }, { ease: 'none', opacity: 1 }, 0)
+            .fromTo(
+              '.between-sun',
+              { opacity: 1, scale: 1, yPercent: 0 },
+              { ease: 'none', opacity: 0.45, scale: 0.88, yPercent: 55 },
+              0,
+            )
+            .fromTo(
+              '.transit-diya',
+              { opacity: 0, scale: 0.7, transformOrigin: '50% 100%' },
+              { ease: 'none', opacity: 1, scale: 1, stagger: 0.07 },
+              0.1,
+            )
+            .fromTo('.between-stars', { opacity: 0 }, { ease: 'none', opacity: 1 }, 0.15)
 
-        root.querySelectorAll('[data-reveal-group]').forEach((group) => {
-          const items = group.querySelectorAll('[data-reveal-item]')
-          if (!items.length) return
-
-          gsap.from(items, {
-            autoAlpha: 0,
-            duration: 0.82,
-            ease: 'power2.out',
-            scrollTrigger: { once: true, start: 'top 86%', trigger: group },
-            stagger: 0.09,
-            y: 26,
-          })
-        })
-
-        gsap.to('.chhath-sun', {
-          ease: 'none',
-          scrollTrigger: {
-            end: 'bottom top',
-            scrub: true,
-            start: 'top bottom',
-            trigger: '#chhath',
-          },
-          yPercent: -6,
-        })
-
-        const betweenTimeline = gsap.timeline({
-          scrollTrigger: {
-            end: 'bottom 55%',
-            scrub: 0.6,
-            start: 'top 78%',
-            trigger: '#between',
-          },
-        })
-
-        betweenTimeline
-          .fromTo('.dawn-wash', { opacity: 1 }, { ease: 'none', opacity: 0 }, 0)
-          .fromTo('.night-wash', { opacity: 0 }, { ease: 'none', opacity: 1 }, 0)
-          .fromTo(
-            '.between-sun',
-            { opacity: 1, scale: 1, yPercent: 0 },
-            { ease: 'none', opacity: 0.45, scale: 0.88, yPercent: 55 },
-            0,
+          // ---- NEW: Hero sun glow pulse on hover/interaction ----
+          gsap.fromTo(
+            '.hero-scene-sun circle[fill="url(#heroSunGlow)"]',
+            { opacity: 0.92 },
+            { opacity: 1, duration: 2, repeat: -1, ease: 'sine.inOut', yoyo: true }
           )
-          .fromTo(
-            '.transit-diya',
-            { opacity: 0, scale: 0.7, transformOrigin: '50% 100%' },
-            { ease: 'none', opacity: 1, scale: 1, stagger: 0.07 },
-            0.1,
+
+          // ---- NEW: Diya flicker on hero diyo group (random short repeats) ----
+          gsap.fromTo(
+            '.hero-diyo use[href="#heroDiyo"]',
+            { opacity: 0.18 },
+            { opacity: 0.8, duration: 0.6 + Math.random() * 0.4, repeat: -1, ease: 'power1.inOut', yoyo: true }
           )
-          .fromTo('.between-stars', { opacity: 0 }, { ease: 'none', opacity: 1 }, 0.15)
 
-        let active = true
-        document.fonts?.ready.then(() => {
-          if (active) ScrollTrigger.refresh()
-        })
+          // ---- NEW: Birds drift right slowly ----
+          gsap.fromTo(
+            '.hero-birds path',
+            { opacity: 0.5, x: -50 },
+            { opacity: 0.5, x: 940, duration: 12 + Math.random() * 6, ease: 'linear', repeat: -1 }
+          )
 
-        return () => {
-          active = false
-        }
-      },
-      rootRef,
-    )
+          // ---- NEW: Scroll cue pulse (already had animate, keep as-is) ----
+          // (the keyframes cue / .scroll-cue-line::after already exist in CSS)
 
-    return () => mm.revert()
+          // ---- Closing: GSAP-driven diya lighting replaces CSS --i---
+          // Use a GSAP timeline to control the closing-light diyas on button click
+          window.gsapClosingTl = gsap.timeline({ paused: true })
+          window.gsapClosingTl
+            .to('.closing-diyas .flame', {
+              opacity: 1,
+              duration: 0.9,
+              stagger: 0.11,
+              ease: 'power2.out',
+            })
+            .to('.closing-diyas .halo', { opacity: 0.9, duration: 0.6, ease: 'power2.out' })
+
+          return () => ctx.revert()
+        },
+        rootRef,
+      )
+
+      return () => ctx.revert()
+    }, rootRef)
   }, [])
 
   const lightDiyas = () => {
