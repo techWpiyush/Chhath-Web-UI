@@ -1,0 +1,183 @@
+@import "tailwindcss";
+
+:root {
+  /* Chhath-inspired palette - warm, glowing, reverential */
+  --color-primary-50: 255 243 224;    /* soft sunrise */
+  --color-primary-100: 254 215 170;   /* golden sunset */
+  --color-primary-200: 251 146 60;   /* deep orange (marigold) */
+  --color-primary-300: 249 115 22;   /* warm goldenrod */
+  --color-primary-400: 234 88 12;    /* rich amber */
+  --color-primary-500: 195 72 0;     /* deep saffron */
+  --color-primary-600: 154 52 18;    /* earthy rust */
+  --color-primary-700: 124 45 18;    /* warm brown */
+  --color-primary-800: 84 42 10;     /* dark amber */
+  --color-primary-900: 69 28 5;      /* deep bronze */
+  --color-primary-950: 46 18 3;      /* near-black bronze */
+
+  /* Tihar-inspired palette - luminous, celebratory */
+  --color-secondary-50: 239 246 255;   /* sky light */
+  --color-secondary-100: 219 234 254;  /* sky blue */
+  --color-secondary-200: 191 219 254;  /* soft blue */
+  --color-secondary-300: 147 197 253;  /* vibrant blue */
+  --color-secondary-400: 96 165 250;   /* bright blue */
+  --color-secondary-500: 59 130 246;   /* royal blue */
+  --color-secondary-600: 37 99 235;    /* deep blue */
+  --color-secondary-700: 29 78 216;    /* navy blue */
+  --color-secondary-800: 30 64 175;    /* dark blue */
+  --color-secondary-900: 30 58 138;    /* deep navy */
+
+  /* Accent - green for renewal, gold for celebration */
+  --color-accent-green: 34 197 94;    /* bright green */
+  --color-accent-gold: 234 179 8;    /* yellow gold */
+
+  /* Text */
+  --color-text-primary: 20 19 18;      /* almost-black */
+  --color-text-secondary: 87 83 78;    /* warm gray */
+  --color-text-muted: 161 161 170;     /* lighter gray */
+
+  --color-background: 255 255 255;    /* pure white */
+
+  /* Gradients */
+  --gradient-sunrise: linear-gradient(135deg, #FEF3E2 0%, #FDE68A 50%, #FDBA74 100%);
+  --gradient-diwali: linear-gradient(135deg, #FFEDD5 0%, #FCD34D 25%, #FFA500 50%, #DC2626 75%, #7C3AED 100%);
+  --gradient-lights: linear-gradient(180deg, #1F2937 0%, #374151 100%);
+
+  /* Spacing */
+  --spacing-section: 8rem;   /* 128px */
+  --spacing-element: 2rem;   /* 32px */
+
+  /* Border radius */
+  --radius-smooth: 0.75rem;  /* 12px */
+  --radius-default: 1rem;   /* 16px */
+  --radius-card: 1.5rem;    /* 24px */
+
+  /* Typography */
+  --font-family-display: "Playfair Display", serif;
+  --font-family-body: "Inter", sans-serif;
+  --font-family-mono: "SF Mono", Monaco, "Cascadia Code", monospace;
+
+  --font-size-display: 4rem;    /* 64px */
+  --font-size-h1: 3rem;        /* 48px */
+  --font-size-h2: 2rem;        /* 32px */
+  --font-size-h3: 1.5rem;      /* 24px */
+  --font-size-body: 1.125rem;  /* 18px */
+  --font-size-small: 0.875rem; /* 14px */
+
+  /* Line heights */
+  --line-height-tight: 1.1;
+  --line-height-snug: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* Letter spacing */
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+
+  /* Shadows */
+  --shadow-glow: 0 0 30px rgba(251, 146, 60, 0.3);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 8px 40px rgba(0, 0, 0, 0.12);
+
+  /* Animations */
+  --transition-default: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Base styles */
+body {
+  @apply antialiased;
+  color: rgb(var(--color-text-primary));
+  background-color: rgb(var(--color-background));
+  font-family: var(--font-family-body);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+/* Typography utilities */
+.display-text {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-display);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-wide);
+  font-weight: 400;
+}
+
+.heading-1 {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-h1);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  font-weight: 600;
+}
+
+.heading-2 {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-h2);
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--letter-spacing-wide);
+  font-weight: 500;
+}
+
+.heading-3 {
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-h3);
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--letter-spacing-normal);
+  font-weight: 600;
+}
+
+.body-large {
+  font-size: 1.25rem; /* 20px */
+  line-height: var(--line-height-relaxed);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+/* Component classes */
+.section-padding {
+  padding: var(--spacing-section) 0;
+}
+
+.element-spacing {
+  margin: var(--spacing-element) 0;
+}
+
+.card {
+  background: white;
+  border-radius: var(--radius-card);
+  padding: var(--spacing-element);
+  box-shadow: var(--shadow-card);
+  transition: var(--transition-default);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
