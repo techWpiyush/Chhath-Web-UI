@@ -41,7 +41,6 @@
 @layer base {
   html {
     background-color: var(--color-ink-950);
-    scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
   }
 
@@ -78,6 +77,35 @@
 
   p {
     text-wrap: pretty;
+  }
+
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #efe2cc;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--color-marigold-400), var(--color-saffron-500));
+    border: 3px solid #efe2cc;
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--color-marigold-300), var(--color-ember-500));
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: #efe2cc;
+  }
+
+  @supports not selector(::-webkit-scrollbar) {
+    html {
+      scrollbar-color: var(--color-marigold-500) #efe2cc;
+    }
   }
 }
 
@@ -200,6 +228,47 @@
   color: rgba(242, 184, 74, 0.06);
 }
 
+/* ---------- Embers ---------- */
+
+.embers {
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+}
+
+.embers span {
+  animation: ember-rise var(--dur) linear infinite;
+  animation-delay: var(--delay);
+  background: radial-gradient(circle, #ffe6ae 0%, var(--color-marigold-400) 45%, rgba(242, 184, 74, 0) 72%);
+  border-radius: 999px;
+  bottom: -1.5rem;
+  opacity: 0;
+  position: absolute;
+  will-change: transform, opacity;
+}
+
+.embers--cool span {
+  background: radial-gradient(circle, #fff0cf 0%, var(--color-saffron-400) 45%, rgba(240, 163, 92, 0) 72%);
+}
+
+@keyframes ember-rise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.6);
+  }
+  12% {
+    opacity: var(--peak);
+  }
+  70% {
+    opacity: calc(var(--peak) * 0.7);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--drift), calc(var(--rise) * -1), 0) scale(1.15);
+  }
+}
+
 .chapter {
   align-items: center;
   display: flex;
@@ -288,6 +357,48 @@
   box-shadow: 0 16px 40px -18px rgba(8, 11, 19, 0.7);
 }
 
+.btn-quiet {
+  background: transparent;
+  border-color: rgba(159, 63, 34, 0.32);
+  color: var(--color-ember-600);
+}
+
+.btn-quiet:hover {
+  background: rgba(159, 63, 34, 0.07);
+  border-color: rgba(159, 63, 34, 0.6);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.btn:disabled:hover {
+  background: var(--color-marigold-400);
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-quiet:disabled:hover {
+  background: transparent;
+  border-color: rgba(159, 63, 34, 0.32);
+}
+
+/* Finished, not forbidden: the completed ritual button is a confirmation, so it
+   keeps full contrast instead of the generic disabled fade. */
+.btn.is-done:disabled {
+  background: rgba(74, 117, 110, 0.14);
+  border-color: rgba(53, 90, 86, 0.34);
+  color: var(--color-river-900);
+  cursor: default;
+  opacity: 1;
+}
+
+.btn.is-done:disabled:hover {
+  background: rgba(74, 117, 110, 0.14);
+  border-color: rgba(53, 90, 86, 0.34);
+}
+
 .text-link {
   align-items: center;
   color: inherit;
@@ -324,6 +435,59 @@
   transform: translateY(0);
 }
 
+/* ---------- Glass surfaces ---------- */
+
+.glass-card {
+  backdrop-filter: blur(14px) saturate(125%);
+  -webkit-backdrop-filter: blur(14px) saturate(125%);
+  background: rgba(255, 255, 255, 0.48);
+  border: 1px solid rgba(255, 255, 255, 0.66);
+  border-radius: 1.15rem;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 18px 42px -30px rgba(61, 43, 25, 0.34);
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s var(--ease-out-soft);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.62);
+  border-color: rgba(255, 255, 255, 0.88);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 22px 48px -30px rgba(61, 43, 25, 0.42);
+  transform: translateY(-3px);
+}
+
+.glass-card--dark {
+  background: rgba(246, 238, 224, 0.045);
+  border-color: rgba(246, 238, 224, 0.13);
+  box-shadow:
+    inset 0 1px 0 rgba(246, 238, 224, 0.09),
+    0 18px 42px -30px rgba(0, 0, 0, 0.72);
+}
+
+.glass-card--dark:hover {
+  background: rgba(246, 238, 224, 0.075);
+  border-color: rgba(246, 238, 224, 0.24);
+  box-shadow:
+    inset 0 1px 0 rgba(246, 238, 224, 0.13),
+    0 22px 48px -30px rgba(0, 0, 0, 0.82);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-card {
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .glass-card--dark {
+    background: rgba(30, 38, 56, 0.96);
+  }
+}
+
 /* ---------- Header ---------- */
 
 .site-header {
@@ -339,9 +503,88 @@
 }
 
 .site-header.is-scrolled {
-  background: rgba(8, 11, 19, 0.82);
-  backdrop-filter: blur(16px) saturate(120%);
+  background: rgba(8, 11, 19, 0.72);
+  backdrop-filter: blur(20px) saturate(135%);
+  -webkit-backdrop-filter: blur(20px) saturate(135%);
   border-bottom-color: rgba(236, 220, 196, 0.12);
+  box-shadow: 0 12px 40px -32px rgba(0, 0, 0, 0.8);
+}
+
+/* The bar warms as the story moves from the sun to the lamp. */
+.site-header[data-chapter="sun"] {
+  --chapter-accent: var(--color-saffron-400);
+}
+
+.site-header[data-chapter="dusk"] {
+  --chapter-accent: var(--color-ember-500);
+}
+
+.site-header[data-chapter="lamp"] {
+  --chapter-accent: var(--color-marigold-300);
+}
+
+.header-tools {
+  align-items: center;
+  display: flex;
+  gap: 0.6rem;
+}
+
+.sound-toggle {
+  align-items: center;
+  background: rgba(8, 11, 19, 0.25);
+  border: 1px solid rgba(246, 238, 224, 0.22);
+  border-radius: 999px;
+  color: var(--color-marigold-300);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 0.62rem;
+  font-weight: 500;
+  gap: 0.45rem;
+  height: 2.6rem;
+  letter-spacing: 0.14em;
+  padding-inline: 0.85rem;
+  text-transform: uppercase;
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.sound-toggle:hover {
+  background: rgba(246, 238, 224, 0.1);
+  border-color: rgba(246, 238, 224, 0.45);
+}
+
+.sound-toggle.is-muted {
+  color: rgba(246, 238, 224, 0.5);
+}
+
+.read-progress {
+  background: rgba(246, 238, 224, 0.1);
+  bottom: 0;
+  height: 2px;
+  left: 0;
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  transition: opacity 0.4s ease;
+}
+
+.site-header.is-scrolled .read-progress {
+  opacity: 1;
+}
+
+.read-progress span {
+  background: linear-gradient(
+    90deg,
+    var(--color-saffron-500),
+    var(--chapter-accent, var(--color-marigold-400))
+  );
+  box-shadow: 0 0 12px rgba(242, 184, 74, 0.55);
+  display: block;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
 }
 
 .header-inner {
@@ -441,7 +684,25 @@
   border-color: rgba(246, 238, 224, 0.45);
 }
 
-@media (min-width: 768px) {
+@media (max-width: 639px) {
+  .btn-nav {
+    display: none;
+  }
+
+  .sound-toggle-text {
+    display: none;
+  }
+
+  .sound-toggle {
+    justify-content: center;
+    padding-inline: 0;
+    width: 2.6rem;
+  }
+}
+
+/* .menu-button sets display itself, so the Tailwind lg:hidden utility cannot
+   win against this unlayered rule. */
+@media (min-width: 1024px) {
   .menu-button {
     display: none;
   }
@@ -531,6 +792,29 @@
   inset: 0;
   position: absolute;
   z-index: 2;
+}
+
+.hero-embers {
+  z-index: 1;
+}
+
+.hero-pointer-glow {
+  background: radial-gradient(
+    circle,
+    rgba(255, 226, 163, 0.2) 0%,
+    rgba(240, 163, 92, 0.11) 38%,
+    rgba(240, 163, 92, 0) 70%
+  );
+  height: 34rem;
+  left: 0;
+  margin: -17rem 0 0 -17rem;
+  mix-blend-mode: screen;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  width: 34rem;
+  z-index: 1;
 }
 
 .hero-inner {
@@ -709,6 +993,10 @@
   min-width: 0;
 }
 
+.theme.glass-card {
+  padding: 1.4rem;
+}
+
 .theme-head {
   align-items: center;
   color: var(--color-ember-600);
@@ -840,24 +1128,25 @@
 }
 
 .chhath-days {
-  border-bottom: 1px solid rgba(84, 52, 24, 0.18);
-  border-top: 1px solid rgba(84, 52, 24, 0.18);
   display: grid;
+  gap: clamp(0.65rem, 1.5vw, 1rem);
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .chhath-day {
-  border-right: 1px solid rgba(84, 52, 24, 0.15);
   padding: 1.7rem 1.35rem 1.9rem;
-  transition: background-color 0.35s ease;
-}
-
-.chhath-day:last-child {
-  border-right: 0;
 }
 
 .chhath-day:hover {
-  background: rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.day-meta {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.7rem;
+  justify-content: space-between;
 }
 
 .day-index {
@@ -865,6 +1154,13 @@
   font-family: var(--font-display);
   font-size: 0.8rem;
   font-style: italic;
+}
+
+.day-time {
+  color: rgba(30, 26, 22, 0.5);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .chhath-day h3 {
@@ -974,6 +1270,10 @@
   z-index: 1;
 }
 
+.between-embers {
+  z-index: 1;
+}
+
 .between-scrim {
   background: radial-gradient(46% 44% at 50% 50%, rgba(8, 11, 19, 0.62), transparent 72%);
   inset: 0;
@@ -1071,18 +1371,34 @@
 }
 
 .tihar-days {
-  border-top: 1px solid rgba(236, 220, 196, 0.16);
+  display: grid;
+  gap: 0.8rem;
   list-style: none;
   padding: 0;
 }
 
 .tihar-day {
+  overflow: hidden;
+}
+
+.tihar-day-toggle {
   align-items: start;
-  border-bottom: 1px solid rgba(236, 220, 196, 0.13);
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
   display: grid;
+  font: inherit;
   gap: clamp(1rem, 2.2vw, 2.25rem);
   grid-template-columns: 3.8rem minmax(0, 0.85fr) minmax(0, 1.45fr) 2.25rem;
-  padding-block: 1.9rem;
+  padding: 1.4rem 1.2rem;
+  text-align: left;
+  transition: background-color 0.35s ease;
+  width: 100%;
+}
+
+.tihar-day-toggle:hover {
+  background: rgba(246, 238, 224, 0.035);
 }
 
 .tihar-num {
@@ -1093,8 +1409,15 @@
   line-height: 1.6;
 }
 
-.tihar-day-head h3 {
+.tihar-day-name {
   color: var(--color-cream-50);
+  display: block;
+  transition: color 0.3s ease;
+}
+
+.tihar-day.is-open .tihar-day-name,
+.tihar-day-toggle:hover .tihar-day-name {
+  color: var(--color-marigold-300);
 }
 
 .tihar-tag {
@@ -1113,42 +1436,67 @@
 }
 
 .tihar-day-mark {
-  color: rgba(242, 184, 74, 0.35);
+  align-items: center;
+  border: 1px solid rgba(242, 184, 74, 0.28);
+  border-radius: 999px;
+  color: rgba(242, 184, 74, 0.65);
+  display: inline-flex;
+  height: 2.1rem;
+  justify-content: center;
   justify-self: end;
   transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
     color 0.35s ease,
-    transform 0.35s var(--ease-out-soft);
+    transform 0.45s var(--ease-out-soft);
+  width: 2.1rem;
 }
 
-.tihar-day:hover .tihar-day-mark {
+.tihar-day-toggle:hover .tihar-day-mark {
+  background: rgba(242, 184, 74, 0.12);
+  border-color: rgba(242, 184, 74, 0.6);
   color: var(--color-marigold-300);
-  transform: translateY(-2px);
+}
+
+.tihar-day.is-open .tihar-day-mark {
+  background: var(--color-marigold-400);
+  border-color: var(--color-marigold-400);
+  color: var(--color-ink-950);
+  transform: rotate(135deg);
+}
+
+.tihar-day-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s var(--ease-out-soft);
+}
+
+.tihar-day.is-open .tihar-day-panel {
+  grid-template-rows: 1fr;
+}
+
+.tihar-day-panel > div {
+  overflow: hidden;
+}
+
+.tihar-day-detail {
+  border-left: 1px solid rgba(242, 184, 74, 0.35);
+  color: rgba(236, 220, 196, 0.78);
+  font-size: 0.92rem;
+  line-height: 1.8;
+  margin: 0 0 1.9rem calc(3.8rem + clamp(1rem, 2.2vw, 2.25rem));
+  max-width: 52ch;
+  opacity: 0;
+  padding-left: 1.25rem;
+  transition: opacity 0.4s ease 0.08s;
+}
+
+.tihar-day.is-open .tihar-day-detail {
+  opacity: 1;
 }
 
 .tihar-note {
   color: rgba(236, 220, 196, 0.62);
-}
-
-.tihar-scene .tihar-flame {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  animation: tihar-flicker 3.6s ease-in-out infinite;
-}
-
-@keyframes tihar-flicker {
-  0%,
-  100% {
-    opacity: 0.94;
-    transform: scaleY(1);
-  }
-  38% {
-    opacity: 1;
-    transform: scaleY(1.07) scaleX(0.97);
-  }
-  68% {
-    opacity: 0.82;
-    transform: scaleY(0.95);
-  }
 }
 
 /* ---------- Closing ---------- */
@@ -1174,49 +1522,163 @@
   width: min(64rem, 120vw);
 }
 
-.closing-diyas {
-  display: block;
-  margin: clamp(1.5rem, 4vw, 2.5rem) auto 0;
-  width: min(36rem, 90vw);
+.closing-embers {
+  z-index: 1;
 }
 
-.closing-diyas .flame {
+/* ---------- The diya ritual ---------- */
+
+.ritual-defs {
+  height: 0;
+  position: absolute;
+  width: 0;
+}
+
+.ritual {
+  margin-top: clamp(2rem, 5vw, 3.25rem);
+  position: relative;
+}
+
+.ritual-bloom {
+  background: radial-gradient(
+    circle,
+    rgba(255, 214, 130, 0.5) 0%,
+    rgba(242, 184, 74, 0.2) 42%,
+    rgba(242, 184, 74, 0) 70%
+  );
+  height: min(46rem, 110vw);
+  left: 50%;
   opacity: 0;
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
+  pointer-events: none;
+  position: absolute;
+  top: 42%;
+  translate: -50% -50%;
+  width: min(46rem, 110vw);
+  z-index: -1;
 }
 
-.closing-diyas.is-lit .flame {
-  animation: flame-in 0.9s var(--ease-out-soft) both;
-  animation-delay: calc(var(--i) * 0.11s);
+.ritual-invite {
+  color: rgba(30, 26, 22, 0.6);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
-.closing-diyas .halo {
-  opacity: 0.12;
-  transition: opacity 0.6s ease;
+.ritual-row {
+  align-items: end;
+  display: grid;
+  gap: clamp(0.25rem, 1.5vw, 1rem);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: clamp(1rem, 3vw, 1.75rem) auto 0;
+  max-width: 44rem;
 }
 
-.closing-diyas.is-lit .halo {
-  opacity: 0.9;
-  transition-delay: calc(var(--i) * 0.11s);
+.ritual-diya {
+  align-items: center;
+  background: none;
+  border: 0;
+  border-radius: 1rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  font: inherit;
+  gap: 0.35rem;
+  padding: 0.5rem 0.25rem 0.75rem;
+  transition: background-color 0.3s ease;
 }
 
-@keyframes flame-in {
-  from {
-    opacity: 0;
-    transform: scale(0.35) translateY(0.35rem);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+.ritual-diya:hover {
+  background: rgba(242, 184, 74, 0.1);
+}
+
+.ritual-lamp {
+  display: block;
+  height: auto;
+  overflow: visible;
+  width: 100%;
+}
+
+/* GSAP owns transform-origin on these nodes; declaring it here too would
+   compound with the matrix GSAP writes to the transform attribute. */
+.ritual-lamp .ritual-flame {
+  opacity: 0;
+}
+
+.ritual-lamp .ritual-halo {
+  opacity: 0.08;
+}
+
+.ritual-lamp .ritual-ring {
+  opacity: 0;
+}
+
+.ritual-diya:hover .ritual-lamp:not(.is-lit) .ritual-halo {
+  opacity: 0.24;
+}
+
+/* Without motion the lamp still has to read as lit. */
+.ritual-lamp.is-lit .ritual-flame {
+  opacity: 1;
+}
+
+.ritual-lamp.is-lit .ritual-halo {
+  opacity: 0.85;
+}
+
+.ritual-label {
+  color: rgba(30, 26, 22, 0.5);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: color 0.35s ease;
+}
+
+.ritual-diya.is-lit .ritual-label {
+  color: var(--color-ember-600);
+}
+
+.ritual-wish {
+  color: var(--color-ember-600);
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 2.2vw, 1.6rem);
+  font-style: italic;
+  line-height: 1.4;
+  margin: clamp(1.25rem, 3vw, 2rem) auto 0;
+  max-width: 30ch;
+  min-height: 2.8em;
+}
+
+.ritual-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.ritual-blessing {
+  color: rgba(30, 26, 22, 0.72);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin: 1.5rem auto 0;
+  max-width: 34ch;
 }
 
 .closing-help {
   color: rgba(30, 26, 22, 0.62);
   font-size: 0.78rem;
   letter-spacing: 0.04em;
-  margin-top: 1.1rem;
+  margin-top: 2.25rem;
+}
+
+.closing-return {
+  color: var(--color-ember-600);
+  margin-top: 0.5rem;
+}
+
+.closing-return:hover {
+  color: var(--color-ember-500);
 }
 
 /* ---------- Footer ---------- */
@@ -1236,6 +1698,33 @@
 }
 
 .footer-link:hover {
+  color: var(--color-marigold-300);
+}
+
+.share-button {
+  align-items: center;
+  background: none;
+  border: 1px solid rgba(236, 220, 196, 0.2);
+  border-radius: 999px;
+  color: rgba(236, 220, 196, 0.78);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: inherit;
+  font-size: 0.72rem;
+  gap: 0.5rem;
+  letter-spacing: 0.06em;
+  margin-top: 1.25rem;
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.share-button:hover {
+  background: rgba(242, 184, 74, 0.12);
+  border-color: rgba(242, 184, 74, 0.5);
   color: var(--color-marigold-300);
 }
 
@@ -1273,8 +1762,8 @@
 }
 
 @media (max-width: 899px) {
-  .tihar-day {
-    grid-template-columns: 2.75rem minmax(0, 1fr) 2rem;
+  .tihar-day-toggle {
+    grid-template-columns: 2.75rem minmax(0, 1fr) 2.1rem;
   }
 
   .tihar-num {
@@ -1294,19 +1783,15 @@
     grid-column: 3;
     grid-row: 1 / 3;
   }
+
+  .tihar-day-detail {
+    margin-left: calc(2.75rem + clamp(1rem, 2.2vw, 2.25rem));
+  }
 }
 
 @media (max-width: 1023px) {
   .chhath-days {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .chhath-day:nth-child(2n) {
-    border-right: 0;
-  }
-
-  .chhath-day:nth-child(-n + 2) {
-    border-bottom: 1px solid rgba(84, 52, 24, 0.15);
   }
 }
 
@@ -1371,17 +1856,38 @@
     width: 94vw;
   }
 
-  .tihar-day-mark {
-    display: none;
-  }
-
-  .tihar-day {
-    grid-template-columns: 2.25rem minmax(0, 1fr);
+  .tihar-day-toggle {
+    gap: 0.75rem 1rem;
+    grid-template-columns: 2rem minmax(0, 1fr) 2.1rem;
+    padding-block: 1.25rem;
   }
 
   .tihar-day-head,
   .tihar-day-copy {
     grid-column: 2;
+  }
+
+  .tihar-day-detail {
+    margin-bottom: 1.5rem;
+    margin-left: 3rem;
+    padding-left: 1rem;
+  }
+
+  .ritual-row {
+    gap: 0.15rem;
+  }
+
+  .ritual-diya {
+    padding-inline: 0;
+  }
+
+  .ritual-label {
+    font-size: 0.53rem;
+    letter-spacing: 0.06em;
+  }
+
+  .ritual-actions .btn {
+    flex: 1 1 auto;
   }
 
   .closing-ornament {
@@ -1397,12 +1903,7 @@
   }
 
   .chhath-day {
-    border-bottom: 1px solid rgba(84, 52, 24, 0.15);
-    border-right: 0;
-  }
-
-  .chhath-day:last-child {
-    border-bottom: 0;
+    padding: 1.4rem;
   }
 }
 
@@ -1425,5 +1926,19 @@
     animation: none;
     opacity: 0.2;
     transform: none;
+  }
+
+  .embers,
+  .hero-pointer-glow,
+  .ritual-bloom {
+    display: none;
+  }
+
+  .between-stars span {
+    animation: none;
+  }
+
+  .tihar-day-panel {
+    transition: none;
   }
 }

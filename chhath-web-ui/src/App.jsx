@@ -1,11 +1,13 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { ArrowDown, ArrowRight, ArrowUp, Flame, Leaf, Sun } from 'lucide-react'
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
+import { ArrowDown, ArrowRight, ArrowUp, Check, Flame, Leaf, Link2, Plus, Sun } from 'lucide-react'
 import Navbar from './components/Navbar'
+import LightRitual from './components/LightRitual'
+import { Embers } from './components/Atmosphere'
 import {
   ChhathScene,
-  ClosingDiyas,
   DiyoMark,
   HeroScene,
   MarigoldDivider,
@@ -14,7 +16,7 @@ import {
 } from './components/Scenes'
 import { chhathDays, culturalNote, navLinks, themes, tiharDays } from './data/site'
 
-gsap.registerPlugin(ScrollTrigger)
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 ScrollTrigger.config({ ignoreMobileResize: true })
 
 const themeIcons = {
@@ -45,182 +47,403 @@ const betweenStars = [
 
 export default function App() {
   const rootRef = useRef(null)
-  const [lights, setLights] = useState(0)
-  const [status, setStatus] = useState('')
+  const [openDay, setOpenDay] = useState(null)
+  const [copied, setCopied] = useState(false)
+  const copyTimer = useRef(0)
 
   useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      if (prefersReducedMotion()) return
+    const root = rootRef.current
+    if (!root) return
 
-      const root = rootRef.current
-      if (!root) return
+    const mm = gsap.matchMedia(root)
 
-      const mm = gsap.matchMedia()
+    // Motion is additive: content is visible by default and only animated *from*
+    // a hidden state, so an animation failure can never blank the page.
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      const onAnchorClick = (event) => {
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        ) {
+          return
+        }
 
-      mm.add(
-        { motion: '(prefers-reduced-motion: no-preference)', desktop: '(min-width: 900px)' },
-        (context) => {
-          if (!context.conditions.motion) return
-          const { desktop } = context.conditions
+        const link = event.target instanceof Element ? event.target.closest('a[href^="#"]') : null
+        if (!link || link.target || link.hasAttribute('download')) return
 
-          // ---- Hero entrance timeline (unchanged, core magic) ----
-          const heroTimeline = gsap.timeline({ defaults: { ease: 'power3.out' } })
-          heroTimeline
-            .from('.hero-kicker', { autoAlpha: 0, y: 14, duration: 0.7 }, 0.1)
-            .from(
-              '.hero-title .line',
-              { autoAlpha: 0, yPercent: 55, duration: 1.1, stagger: 0.12 },
-              0.2,
-            )
-            .from('.hero-copy', { autoAlpha: 0, y: 18, duration: 0.8 }, 0.72)
-            .from('.hero-actions', { autoAlpha: 0, y: 18, duration: 0.75 }, 0.88)
-            .from('.hero-foot', { autoAlpha: 0, y: 12, duration: 0.7 }, 1.05)
-            .from(
-              '.hero-scene-sun',
-              { autoAlpha: 0, y: 30, scale: 0.96, transformOrigin: '50% 50%', duration: 1.6 },
-              0.15,
-            )
-            .from('.hero-devotee', { autoAlpha: 0, y: 16, duration: 0.9, stagger: 0.12 }, 0.85)
-            .from('.hero-diyo', { autoAlpha: 0, y: 8, duration: 0.8, stagger: 0.09 }, 0.95)
+        const target = document.getElementById(link.hash.slice(1))
+        if (!target) return
 
-          // Desktop: scroll-linked y-parallax on hero scene & main (unchanged)
-          if (desktop) {
-            gsap.to('.hero-scene', {
-              ease: 'none',
-              scrollTrigger: {
-                end: 'bottom top',
-                scrub: true,
-                start: 'top top',
-                trigger: '.hero',
+        event.preventDefault()
+        if (window.location.hash !== link.hash) window.history.pushState(null, '', link.hash)
+
+        gsap.to(window, {
+          duration: 1.1,
+          ease: 'power3.inOut',
+          overwrite: 'auto',
+          scrollTo: {
+            autoKill: true,
+            offsetY: parseFloat(window.getComputedStyle(target).scrollMarginTop) || 0,
+            y: target,
+          },
+          onComplete: () => {
+            if (link.classList.contains('skip-link')) target.focus({ preventScroll: true })
+          },
+        })
+      }
+
+      root.addEventListener('click', onAnchorClick)
+
+      // One ScrollTrigger per scene keeps dozens of ambient loops paused while
+      // that scene is out of view.
+      const gate = (targets, trigger) => {
+        if (!targets.length) return
+        targets.forEach((tween) => tween.pause())
+        ScrollTrigger.create({
+          trigger,
+          start: 'top bottom',
+          end: 'bottom top',
+          onToggle: (self) => {
+            targets.forEach((tween) => (self.isActive ? tween.play() : tween.pause()))
+          },
+        })
+      }
+
+      const flicker = (selector, trigger) => {
+        const flames = Array.from(root.querySelectorAll(selector))
+        if (!flames.length) return
+
+        gate(
+          flames.map((flame, index) => {
+            gsap.set(flame, { transformOrigin: '50% 100%' })
+            return gsap
+              .timeline({ paused: true, repeat: -1, yoyo: true, delay: -(index * 0.29) })
+              .to(flame, {
+                duration: 0.68 + (index % 5) * 0.15,
+                ease: 'sine.inOut',
+                opacity: 1,
+                scaleX: 0.93,
+                scaleY: 1.16,
+              })
+              .to(flame, {
+                duration: 0.54 + (index % 3) * 0.19,
+                ease: 'sine.inOut',
+                opacity: 0.82,
+                rotation: index % 2 ? 2.4 : -2.4,
+                scaleX: 1.05,
+                scaleY: 0.9,
+              })
+          }),
+          trigger,
+        )
+      }
+
+      const shimmer = (selector, trigger) => {
+        const targets = Array.from(root.querySelectorAll(selector))
+        if (!targets.length) return
+
+        gate(
+          targets.map((target, index) => {
+            const base = Number(target.getAttribute('opacity') ?? 1)
+            return gsap.fromTo(
+              target,
+              { opacity: base * 0.55 },
+              {
+                delay: -(index * 0.37),
+                duration: 2.6 + (index % 4) * 0.7,
+                ease: 'sine.inOut',
+                opacity: base,
+                paused: true,
+                repeat: -1,
+                yoyo: true,
               },
-              yPercent: 7,
-            })
+            )
+          }),
+          trigger,
+        )
+      }
 
-            gsap.to('.hero-main', {
-              ease: 'none',
-              scrollTrigger: {
-                end: 'bottom top',
-                scrub: true,
-                start: 'top top',
-                trigger: '.hero',
+      const heroTimeline = gsap.timeline({ defaults: { ease: 'power3.out' } })
+      heroTimeline
+        .from('.hero-kicker', { autoAlpha: 0, y: 14, duration: 0.7 }, 0.1)
+        .from('.hero-title .line', { autoAlpha: 0, yPercent: 55, duration: 1.1, stagger: 0.12 }, 0.2)
+        .from('.hero-copy', { autoAlpha: 0, y: 18, duration: 0.8 }, 0.72)
+        .from('.hero-actions', { autoAlpha: 0, y: 18, duration: 0.75 }, 0.88)
+        .from('.hero-foot', { autoAlpha: 0, y: 12, duration: 0.7 }, 1.05)
+        .from(
+          '.hero-scene-sun',
+          { autoAlpha: 0, y: 30, scale: 0.96, transformOrigin: '50% 50%', duration: 1.6 },
+          0.15,
+        )
+        .from('.hero-devotee', { autoAlpha: 0, y: 16, duration: 0.9, stagger: 0.12 }, 0.85)
+        .from('.hero-diyo', { autoAlpha: 0, y: 8, duration: 0.8, stagger: 0.09 }, 0.95)
+
+      root.querySelectorAll('[data-reveal]').forEach((element) => {
+        gsap.from(element, {
+          autoAlpha: 0,
+          duration: 0.95,
+          ease: 'power2.out',
+          scrollTrigger: { once: true, start: 'top 88%', trigger: element },
+          y: 30,
+        })
+      })
+
+      root.querySelectorAll('[data-reveal-group]').forEach((group) => {
+        const items = group.querySelectorAll('[data-reveal-item]')
+        if (!items.length) return
+
+        gsap.from(items, {
+          autoAlpha: 0,
+          duration: 0.82,
+          ease: 'power2.out',
+          scrollTrigger: { once: true, start: 'top 86%', trigger: group },
+          stagger: 0.09,
+          y: 26,
+        })
+      })
+
+      gsap.to('.chhath-sun', {
+        ease: 'none',
+        scrollTrigger: { end: 'bottom top', scrub: true, start: 'top bottom', trigger: '#chhath' },
+        yPercent: -6,
+      })
+
+      const betweenTimeline = gsap.timeline({
+        scrollTrigger: { end: 'bottom 55%', scrub: 0.6, start: 'top 78%', trigger: '#between' },
+      })
+
+      betweenTimeline
+        .fromTo('.dawn-wash', { opacity: 1 }, { ease: 'none', opacity: 0 }, 0)
+        .fromTo('.night-wash', { opacity: 0 }, { ease: 'none', opacity: 1 }, 0)
+        .fromTo(
+          '.between-sun',
+          { opacity: 1, scale: 1, yPercent: 0 },
+          { ease: 'none', opacity: 0.45, scale: 0.88, yPercent: 55 },
+          0,
+        )
+        .fromTo(
+          '.transit-diya',
+          { opacity: 0, scale: 0.7, transformOrigin: '50% 100%' },
+          { ease: 'none', opacity: 1, scale: 1, stagger: 0.07 },
+          0.1,
+        )
+        .fromTo('.between-stars', { opacity: 0 }, { ease: 'none', opacity: 1 }, 0.15)
+
+      const halo = root.querySelector('.hero-sun-halo')
+      if (halo) {
+        gate(
+          [
+            gsap.fromTo(
+              halo,
+              { opacity: 0.72, scale: 0.97, transformOrigin: '50% 50%' },
+              {
+                duration: 4.6,
+                ease: 'sine.inOut',
+                opacity: 1,
+                paused: true,
+                repeat: -1,
+                scale: 1.04,
+                yoyo: true,
               },
-              yPercent: -5,
-            })
-          }
+            ),
+          ],
+          '.hero',
+        )
+      }
 
-          // ---- Scroll-reveal per-element triggers (unchanged) ----
-          root.querySelectorAll('[data-reveal]').forEach((element) => {
-            gsap.from(element, {
-              autoAlpha: 0,
-              duration: 0.95,
-              ease: 'power2.out',
-              scrollTrigger: { once: true, start: 'top 88%', trigger: element },
-              y: 30,
-            })
-          })
+      flicker('.hero-diyo .diyo-flame', '.hero')
+      flicker('.chhath-scene .diyo-flame', '#chhath')
+      flicker('.tihar-scene .diyo-flame', '#tihar')
+      flicker('.between-diyas .diyo-flame', '#between')
 
-          root.querySelectorAll('[data-reveal-group]').forEach((group) => {
-            const items = group.querySelectorAll('[data-reveal-item]')
-            if (!items.length) return
+      shimmer('.hero-shimmer rect', '.hero')
+      shimmer('.chhath-shimmer rect', '#chhath')
 
-            gsap.from(items, {
-              autoAlpha: 0,
-              duration: 0.82,
-              ease: 'power2.out',
-              scrollTrigger: { once: true, start: 'top 86%', trigger: group },
-              stagger: 0.09,
-              y: 26,
-            })
-          })
-
-          // ---- Chhath sun scroll ----
-          gsap.to('.chhath-sun', {
-            ease: 'none',
-            scrollTrigger: {
-              end: 'bottom top',
-              scrub: true,
-              start: 'top bottom',
-              trigger: '#chhath',
+      const birdLoops = Array.from(root.querySelectorAll('.hero-bird-wing')).map((bird, index) => {
+        const duration = 36 + index * 11
+        const drift = gsap.timeline({ paused: true, repeat: -1 })
+        drift
+          .fromTo(bird, { x: -180 }, { duration, ease: 'none', x: 1620 }, 0)
+          .fromTo(bird, { opacity: 0 }, { duration: 4, ease: 'power1.out', opacity: 0.5 }, 0)
+          .to(bird, { duration: 5, ease: 'power1.in', opacity: 0 }, duration - 5)
+          .to(
+            bird,
+            { duration: duration / 2, ease: 'sine.inOut', repeat: 1, y: '+=18', yoyo: true },
+            0,
+          )
+          .to(
+            bird,
+            {
+              duration: 0.34 + index * 0.07,
+              ease: 'sine.inOut',
+              repeat: -1,
+              scaleY: 0.45,
+              transformOrigin: '50% 50%',
+              yoyo: true,
             },
-            yPercent: -6,
-          })
+            0,
+          )
 
-          // ---- Between section: scroll-driven sun/mist/wash transition ----
-          const betweenTimeline = gsap.timeline({
-            scrollTrigger: {
-              end: 'bottom 55%',
-              scrub: 0.6,
-              start: 'top 78%',
-              trigger: '#between',
-            },
-          })
+        drift.progress((index * 0.41) % 1)
+        return drift
+      })
 
-          betweenTimeline
-            .fromTo('.dawn-wash', { opacity: 1 }, { ease: 'none', opacity: 0 }, 0)
-            .fromTo('.night-wash', { opacity: 0 }, { ease: 'none', opacity: 1 }, 0)
-            .fromTo(
-              '.between-sun',
-              { opacity: 1, scale: 1, yPercent: 0 },
-              { ease: 'none', opacity: 0.45, scale: 0.88, yPercent: 55 },
-              0,
+      gate(birdLoops, '.hero')
+
+      const stars = Array.from(root.querySelectorAll('.tihar-stars circle'))
+      if (stars.length) {
+        gate(
+          stars.map((star, index) =>
+            gsap.fromTo(
+              star,
+              { opacity: 0.25 },
+              {
+                delay: -(index * 0.23),
+                duration: 1.9 + (index % 6) * 0.55,
+                ease: 'sine.inOut',
+                opacity: 0.95,
+                paused: true,
+                repeat: -1,
+                yoyo: true,
+              },
+            ),
+          ),
+          '#tihar',
+        )
+      }
+
+      const door = root.querySelector('.tihar-door')
+      if (door) {
+        gate(
+          [
+            gsap.fromTo(
+              door,
+              { opacity: 0.8 },
+              { duration: 3.4, ease: 'sine.inOut', opacity: 1, paused: true, repeat: -1, yoyo: true },
+            ),
+          ],
+          '#tihar',
+        )
+      }
+
+      const flowers = Array.from(root.querySelectorAll('.garland-flower'))
+      if (flowers.length) {
+        gate(
+          flowers.map((flower, index) => {
+            gsap.set(flower, { transformOrigin: '50% 0%' })
+            return gsap.fromTo(
+              flower,
+              { rotation: -3.4 },
+              {
+                delay: -(index * 0.31),
+                duration: 2.4 + (index % 5) * 0.42,
+                ease: 'sine.inOut',
+                paused: true,
+                repeat: -1,
+                rotation: 3.4,
+                yoyo: true,
+              },
             )
-            .fromTo(
-              '.transit-diya',
-              { opacity: 0, scale: 0.7, transformOrigin: '50% 100%' },
-              { ease: 'none', opacity: 1, scale: 1, stagger: 0.07 },
-              0.1,
-            )
-            .fromTo('.between-stars', { opacity: 0 }, { ease: 'none', opacity: 1 }, 0.15)
+          }),
+          '#tihar',
+        )
+      }
 
-          // ---- NEW: Hero sun glow pulse on hover/interaction ----
-          gsap.fromTo(
-            '.hero-scene-sun circle[fill="url(#heroSunGlow)"]',
-            { opacity: 0.92 },
-            { opacity: 1, duration: 2, repeat: -1, ease: 'sine.inOut', yoyo: true }
-          )
+      return () => root.removeEventListener('click', onAnchorClick)
+    })
 
-          // ---- NEW: Diya flicker on hero diyo group (random short repeats) ----
-          gsap.fromTo(
-            '.hero-diyo use[href="#heroDiyo"]',
-            { opacity: 0.18 },
-            { opacity: 0.8, duration: 0.6 + Math.random() * 0.4, repeat: -1, ease: 'power1.inOut', yoyo: true }
-          )
+    // Parallax and pointer-follow are desktop affordances, kept in their own
+    // query so crossing 900px never re-hides already-revealed text.
+    mm.add(
+      '(min-width: 900px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)',
+      () => {
+        gsap.to('.hero-scene', {
+          ease: 'none',
+          scrollTrigger: { end: 'bottom top', scrub: true, start: 'top top', trigger: '.hero' },
+          yPercent: 7,
+        })
 
-          // ---- NEW: Birds drift right slowly ----
-          gsap.fromTo(
-            '.hero-birds path',
-            { opacity: 0.5, x: -50 },
-            { opacity: 0.5, x: 940, duration: 12 + Math.random() * 6, ease: 'linear', repeat: -1 }
-          )
+        gsap.to('.hero-main', {
+          ease: 'none',
+          scrollTrigger: { end: 'bottom top', scrub: true, start: 'top top', trigger: '.hero' },
+          yPercent: -5,
+        })
 
-          // ---- NEW: Scroll cue pulse (already had animate, keep as-is) ----
-          // (the keyframes cue / .scroll-cue-line::after already exist in CSS)
+        const hero = root.querySelector('.hero')
+        const glow = root.querySelector('.hero-pointer-glow')
+        if (!hero || !glow) return
 
-          // ---- Closing: GSAP-driven diya lighting replaces CSS --i---
-          // Use a GSAP timeline to control the closing-light diyas on button click
-          window.gsapClosingTl = gsap.timeline({ paused: true })
-          window.gsapClosingTl
-            .to('.closing-diyas .flame', {
-              opacity: 1,
-              duration: 0.9,
-              stagger: 0.11,
-              ease: 'power2.out',
-            })
-            .to('.closing-diyas .halo', { opacity: 0.9, duration: 0.6, ease: 'power2.out' })
+        const moveX = gsap.quickTo(glow, 'x', { duration: 0.75, ease: 'power3' })
+        const moveY = gsap.quickTo(glow, 'y', { duration: 0.75, ease: 'power3' })
+        const fade = gsap.quickTo(glow, 'opacity', { duration: 0.6, ease: 'power2' })
 
-          return () => ctx.revert()
-        },
-        rootRef,
-      )
+        const onMove = (event) => {
+          const bounds = hero.getBoundingClientRect()
+          moveX(event.clientX - bounds.left)
+          moveY(event.clientY - bounds.top)
+        }
+        const onEnter = () => fade(1)
+        const onLeave = () => fade(0)
 
-      return () => ctx.revert()
-    }, rootRef)
+        hero.addEventListener('pointermove', onMove)
+        hero.addEventListener('pointerenter', onEnter)
+        hero.addEventListener('pointerleave', onLeave)
+
+        return () => {
+          hero.removeEventListener('pointermove', onMove)
+          hero.removeEventListener('pointerenter', onEnter)
+          hero.removeEventListener('pointerleave', onLeave)
+        }
+      },
+    )
+
+    // Fraunces and Inter load from Google Fonts and change every heading height,
+    // so trigger positions must be recomputed once they land.
+    let cancelled = false
+    document.fonts?.ready.then(() => {
+      if (!cancelled) ScrollTrigger.refresh()
+    })
+
+    // Opening a Tihar panel moves everything below it. Without a refresh the
+    // scrub timelines downstream stay pinned to the old, shorter document.
+    let lastHeight = root.offsetHeight
+    let refreshTimer = 0
+    const observer =
+      typeof ResizeObserver === 'undefined'
+        ? null
+        : new ResizeObserver(() => {
+            const height = root.offsetHeight
+            if (height === lastHeight) return
+            lastHeight = height
+            window.clearTimeout(refreshTimer)
+            refreshTimer = window.setTimeout(() => ScrollTrigger.refresh(), 140)
+          })
+    observer?.observe(root)
+
+    return () => {
+      cancelled = true
+      observer?.disconnect()
+      window.clearTimeout(refreshTimer)
+      mm.revert()
+    }
   }, [])
 
-  const lightDiyas = () => {
-    setLights((count) => count + 1)
-    setStatus('Five diyas are lit. May the year hold light, gratitude, and good company.')
-  }
+  useLayoutEffect(() => () => window.clearTimeout(copyTimer.current), [])
+
+  const sharePage = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+    } catch {
+      return
+    }
+    setCopied(true)
+    window.clearTimeout(copyTimer.current)
+    copyTimer.current = window.setTimeout(() => setCopied(false), 2600)
+  }, [])
 
   return (
     <div ref={rootRef}>
@@ -234,6 +457,8 @@ export default function App() {
         <section aria-labelledby="hero-title" className="hero grain" id="top">
           <div aria-hidden="true" className="hero-sky" />
           <HeroScene className="hero-scene" />
+          <Embers className="hero-embers" count={18} seed={11} />
+          <div aria-hidden="true" className="hero-pointer-glow" />
           <div aria-hidden="true" className="hero-scrim" />
 
           <div className="shell hero-inner">
@@ -338,7 +563,7 @@ export default function App() {
               {themes.map((theme, index) => {
                 const Icon = themeIcons[theme.id]
                 return (
-                  <article className="theme" data-reveal-item key={theme.id}>
+                  <article className="theme glass-card" data-reveal-item key={theme.id}>
                     <div className="theme-head">
                       <Icon aria-hidden="true" size={22} strokeWidth={1.5} />
                       <span className="theme-num">{String(index + 1).padStart(2, '0')}</span>
@@ -419,8 +644,11 @@ export default function App() {
 
             <ol className="chhath-days mt-8" data-reveal-group>
               {chhathDays.map((day, index) => (
-                <li className="chhath-day" data-reveal-item key={day.name}>
-                  <span className="day-index">Day {String(index + 1).padStart(2, '0')}</span>
+                <li className="chhath-day glass-card" data-reveal-item key={day.name}>
+                  <span className="day-meta">
+                    <span className="day-index">Day {String(index + 1).padStart(2, '0')}</span>
+                    <span className="day-time">{day.time}</span>
+                  </span>
                   <h3 className="card-title">{day.name}</h3>
                   <p>{day.text}</p>
                 </li>
@@ -447,6 +675,7 @@ export default function App() {
           </div>
           <div aria-hidden="true" className="between-horizon" />
           <TransitionDiyas className="between-diyas" />
+          <Embers className="between-embers" count={14} seed={29} />
           <div aria-hidden="true" className="between-scrim" />
 
           <div className="between-content">
@@ -531,22 +760,44 @@ export default function App() {
                   <h3 className="title-md mt-3 text-cream-50">Each day honours a bond.</h3>
                 </div>
                 <p className="copy-sm max-w-sm text-cream-200/55">
-                  Names and order can vary. These are the days as they are commonly celebrated.
+                  Tap a day to read a little more. Names and order can vary by community.
                 </p>
               </div>
 
               <ol className="tihar-days mt-10" data-reveal-group>
-                {tiharDays.map((day, index) => (
-                  <li className="tihar-day" data-reveal-item key={day.name}>
-                    <span className="tihar-num">{String(index + 1).padStart(2, '0')}</span>
-                    <div className="tihar-day-head">
-                      <h3 className="card-title">{day.name}</h3>
-                      <span className="tihar-tag">{day.tag}</span>
-                    </div>
-                    <p className="tihar-day-copy">{day.text}</p>
-                    <DiyoMark className="tihar-day-mark" size={22} />
-                  </li>
-                ))}
+                {tiharDays.map((day, index) => {
+                  const open = openDay === index
+                  return (
+                    <li
+                      className={`tihar-day glass-card glass-card--dark ${open ? 'is-open' : ''}`}
+                      data-reveal-item
+                      key={day.name}
+                    >
+                      <button
+                        aria-controls={`tihar-panel-${index}`}
+                        aria-expanded={open}
+                        className="tihar-day-toggle"
+                        onClick={() => setOpenDay(open ? null : index)}
+                        type="button"
+                      >
+                        <span className="tihar-num">{String(index + 1).padStart(2, '0')}</span>
+                        <span className="tihar-day-head">
+                          <span className="card-title tihar-day-name">{day.name}</span>
+                          <span className="tihar-tag">{day.tag}</span>
+                        </span>
+                        <span className="tihar-day-copy">{day.text}</span>
+                        <span aria-hidden="true" className="tihar-day-mark">
+                          <Plus size={16} strokeWidth={1.9} />
+                        </span>
+                      </button>
+                      <div className="tihar-day-panel" id={`tihar-panel-${index}`} inert={!open}>
+                        <div>
+                          <p className="tihar-day-detail">{day.detail}</p>
+                        </div>
+                      </div>
+                    </li>
+                  )
+                })}
               </ol>
               <p className="note tihar-note mt-6">{culturalNote}</p>
             </div>
@@ -555,6 +806,7 @@ export default function App() {
 
         <section aria-labelledby="light-title" className="closing-section section-pad grain" id="light">
           <div aria-hidden="true" className="closing-ornament" />
+          <Embers className="closing-embers" count={12} seed={47} />
           <div className="shell relative z-10 text-center">
             <p className="eyebrow text-ember-600">A closing wish</p>
             <h2 className="section-title mx-auto mt-5 max-w-3xl" data-reveal id="light-title">
@@ -565,30 +817,19 @@ export default function App() {
               wish: that the light we tend for a few days stays with us for the year.
             </p>
 
+            {/* The ritual is the page's primary interaction, so it is never
+                gated behind a scroll reveal that could fail to fire. */}
             <div id="closing-light">
-              <ClosingDiyas className="mx-auto" key={lights} lit={lights > 0} />
+              <LightRitual />
             </div>
 
-            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <button
-                aria-controls="closing-light"
-                className="btn btn-primary"
-                onClick={lightDiyas}
-                type="button"
-              >
-                <DiyoMark size={18} />
-                {lights > 0 ? 'Light them again' : 'Light the diyas'}
-              </button>
-              <a className="text-link" href="#top">
-                Return to the beginning
-                <ArrowUp aria-hidden="true" size={16} strokeWidth={1.8} />
-              </a>
-            </div>
-
-            <p className="closing-help">For gratitude. For the people beside you. For the road ahead.</p>
-            <p aria-live="polite" className="sr-only" role="status">
-              {status}
+            <p className="closing-help">
+              For gratitude. For the people beside you. For the road ahead.
             </p>
+            <a className="text-link closing-return" href="#top">
+              Return to the beginning
+              <ArrowUp aria-hidden="true" size={16} strokeWidth={1.8} />
+            </a>
           </div>
         </section>
       </main>
@@ -631,6 +872,17 @@ export default function App() {
               <p className="copy-sm mt-4 text-cream-200/55">
                 A respectful introduction to two living traditions. Customs and names vary by region
                 and household.
+              </p>
+              <button className="share-button" onClick={sharePage} type="button">
+                {copied ? (
+                  <Check aria-hidden="true" size={15} strokeWidth={2} />
+                ) : (
+                  <Link2 aria-hidden="true" size={15} strokeWidth={1.8} />
+                )}
+                {copied ? 'Link copied — pass it on' : 'Share this page'}
+              </button>
+              <p aria-live="polite" className="sr-only" role="status">
+                {copied ? 'Page link copied to your clipboard.' : ''}
               </p>
             </div>
           </div>

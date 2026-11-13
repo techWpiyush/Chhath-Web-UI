@@ -54,6 +54,23 @@ export function MarigoldDivider({ className = '' }) {
   )
 }
 
+// Each lamp owns its flame node. A flame parked in <defs> and instanced with
+// <use> renders as one shared path, so it can never be staggered or flickered
+// lamp by lamp.
+const heroDiyas = [
+  [618, 706, 0.9],
+  [700, 780, 1.05],
+  [932, 748, 0.85],
+  [558, 824, 0.7],
+  [862, 850, 0.75],
+]
+
+const heroBirds = [
+  { y: 310, d: 'M0 0c8-8 16-8 24 0 8-8 16-8 24 0' },
+  { y: 268, d: 'M0 0c6-6 12-6 18 0 6-6 12-6 18 0' },
+  { y: 332, d: 'M0 0c5-5 10-5 15 0 5-5 10-5 15 0' },
+]
+
 export function HeroScene({ className = '' }) {
   return (
     <svg
@@ -101,11 +118,14 @@ export function HeroScene({ className = '' }) {
           <stop offset="0" stopColor="#fff4c7" />
           <stop offset="1" stopColor="#f0a94c" />
         </linearGradient>
-        <g id="heroDiyo">
+        <radialGradient id="heroLampGlow">
+          <stop offset="0" stopColor="#ffd784" stopOpacity=".7" />
+          <stop offset="1" stopColor="#f2b84a" stopOpacity="0" />
+        </radialGradient>
+        <g id="heroDiyoBowl">
           <ellipse cx="0" cy="6" fill="#f6c36b" opacity=".18" rx="20" ry="5" />
           <path d="M-15 0C-10 9 10 9 15 0C9 6-9 6-15 0Z" fill="#e9a34d" />
           <path d="M-12 0C-6-3 6-3 12 0Z" fill="#b76a33" />
-          <path d="M0-15C-6-9-4-3 0 0C4-3 6-9 0-15Z" fill="url(#heroFlame)" />
         </g>
       </defs>
 
@@ -120,7 +140,7 @@ export function HeroScene({ className = '' }) {
       </g>
 
       <g className="hero-scene-sun">
-        <circle cx="840" cy="505" fill="url(#heroSunGlow)" r="250" />
+        <circle className="hero-sun-halo" cx="840" cy="505" fill="url(#heroSunGlow)" r="250" />
         <circle cx="840" cy="505" fill="url(#heroSunCore)" r="78" />
         <circle
           cx="840"
@@ -140,9 +160,11 @@ export function HeroScene({ className = '' }) {
         strokeLinecap="round"
         strokeWidth="2.4"
       >
-        <path d="M650 310c8-8 16-8 24 0 8-8 16-8 24 0" />
-        <path d="M720 270c6-6 12-6 18 0 6-6 12-6 18 0" />
-        <path d="M930 330c5-5 10-5 15 0 5-5 10-5 15 0" />
+        {heroBirds.map((bird) => (
+          <g className="hero-bird" key={bird.d} transform={`translate(0 ${bird.y})`}>
+            <path className="hero-bird-wing" d={bird.d} />
+          </g>
+        ))}
       </g>
 
       <path
@@ -239,21 +261,17 @@ export function HeroScene({ className = '' }) {
         <ellipse cx="0" cy="44" fill="#f0b04e" opacity=".7" rx="32" ry="7" />
       </g>
 
-      <g className="hero-diyo">
-        <use href="#heroDiyo" transform="translate(618 706) scale(.9)" />
-      </g>
-      <g className="hero-diyo">
-        <use href="#heroDiyo" transform="translate(700 780) scale(1.05)" />
-      </g>
-      <g className="hero-diyo">
-        <use href="#heroDiyo" transform="translate(932 748) scale(.85)" />
-      </g>
-      <g className="hero-diyo">
-        <use href="#heroDiyo" transform="translate(558 824) scale(.7)" />
-      </g>
-      <g className="hero-diyo">
-        <use href="#heroDiyo" transform="translate(862 850) scale(.75)" />
-      </g>
+      {heroDiyas.map(([x, y, scale]) => (
+        <g
+          className="hero-diyo"
+          key={`${x}-${y}`}
+          transform={`translate(${x} ${y}) scale(${scale})`}
+        >
+          <circle className="diyo-glow" cx="0" cy="-6" fill="url(#heroLampGlow)" r="26" />
+          <use href="#heroDiyoBowl" />
+          <path className="diyo-flame" d="M0-15C-6-9-4-3 0 0C4-3 6-9 0-15Z" fill="url(#heroFlame)" />
+        </g>
+      ))}
 
       <g fill="none" opacity=".9" stroke="#080b13" strokeLinecap="round" strokeWidth="4">
         <path d="M40 900C36 842 42 800 26 756" />
@@ -268,11 +286,18 @@ export function HeroScene({ className = '' }) {
   )
 }
 
+const chhathDiyas = [
+  [540, 552, 0.95],
+  [620, 600, 1.1],
+  [492, 626, 0.8],
+  [714, 640, 0.9],
+]
+
 export function ChhathScene({ className = '' }) {
   return (
     <svg
       aria-labelledby="chhath-art-title"
-      className={className}
+      className={`chhath-scene ${className}`}
       role="img"
       viewBox="0 0 900 700"
       xmlns="http://www.w3.org/2000/svg"
@@ -311,11 +336,10 @@ export function ChhathScene({ className = '' }) {
           <stop offset="0" stopColor="#fff5cc" />
           <stop offset="1" stopColor="#f0a94c" />
         </linearGradient>
-        <g id="chhathDiyo">
+        <g id="chhathDiyoBowl">
           <ellipse cx="0" cy="6" fill="#f2c375" opacity=".22" rx="19" ry="5" />
           <path d="M-14 0C-9 8 9 8 14 0C8 6-8 6-14 0Z" fill="#e39b48" />
           <path d="M-11 0C-5-3 5-3 11 0Z" fill="#a96031" />
-          <path d="M0-14C-6-8-4-3 0 0C4-3 6-8 0-14Z" fill="url(#chhathFlame)" />
         </g>
       </defs>
 
@@ -350,7 +374,7 @@ export function ChhathScene({ className = '' }) {
 
       <rect fill="url(#chhathWater)" height="270" width="900" y="430" />
       <path d="M586 430H706L754 700H538Z" fill="url(#chhathReflect)" opacity=".8" />
-      <g fill="#fbe1a4">
+      <g className="chhath-shimmer" fill="#fbe1a4">
         <rect height="3" opacity=".5" rx="1.5" width="130" x="580" y="456" />
         <rect height="3" opacity=".4" rx="1.5" width="90" x="600" y="486" />
         <rect height="4" opacity=".32" rx="2" width="160" x="566" y="524" />
@@ -431,18 +455,20 @@ export function ChhathScene({ className = '' }) {
         />
       </g>
 
-      <g className="chhath-diyo">
-        <use href="#chhathDiyo" transform="translate(540 552) scale(.95)" />
-      </g>
-      <g className="chhath-diyo">
-        <use href="#chhathDiyo" transform="translate(620 600) scale(1.1)" />
-      </g>
-      <g className="chhath-diyo">
-        <use href="#chhathDiyo" transform="translate(492 626) scale(.8)" />
-      </g>
-      <g className="chhath-diyo">
-        <use href="#chhathDiyo" transform="translate(714 640) scale(.9)" />
-      </g>
+      {chhathDiyas.map(([x, y, scale]) => (
+        <g
+          className="chhath-diyo"
+          key={`${x}-${y}`}
+          transform={`translate(${x} ${y}) scale(${scale})`}
+        >
+          <use href="#chhathDiyoBowl" />
+          <path
+            className="diyo-flame"
+            d="M0-14C-6-8-4-3 0 0C4-3 6-8 0-14Z"
+            fill="url(#chhathFlame)"
+          />
+        </g>
+      ))}
 
       <g fill="none" opacity=".2" stroke="#d9f0e6" strokeWidth="1">
         <path d="M180 570c40-8 78-8 118 0" />
@@ -479,6 +505,18 @@ const tiharStars = [
   [268, 196, 1],
   [630, 202, 0.8],
   [818, 188, 1.1],
+]
+
+const tiharDiyas = [
+  [388, 558, 0.82, 1],
+  [512, 558, 0.82, 1],
+  [282, 600, 0.95, 1],
+  [618, 600, 0.95, 1],
+  [344, 646, 0.85, 1],
+  [556, 646, 0.85, 1],
+  [450, 668, 0.78, 1],
+  [210, 660, 0.7, 0.85],
+  [690, 660, 0.7, 0.85],
 ]
 
 export function TiharScene({ className = '' }) {
@@ -539,23 +577,17 @@ export function TiharScene({ className = '' }) {
           ))}
           <circle fill="#a8601c" r="3.2" />
         </g>
-        <g id="tiharDiyo">
+        <g id="tiharDiyoBowl">
           <circle cx="0" cy="-6" fill="url(#tiharGlow)" opacity=".55" r="27" />
           <ellipse cx="0" cy="12" fill="#f2b84a" opacity=".14" rx="23" ry="5" />
           <path d="M-20 2C-13 14 13 14 20 2C12 9-12 9-20 2Z" fill="#b9712f" />
           <path d="M-17 2C-9-3 9-3 17 2Z" fill="#e6a34a" />
-          <path
-            className="tihar-flame"
-            d="M0-18C-7-11-5-4 0 0C5-4 7-11 0-18Z"
-            fill="url(#tiharFlame)"
-          />
-          <circle cx="0" cy="-1" fill="#3a2415" opacity=".7" r="1.6" />
         </g>
       </defs>
 
       <rect fill="url(#tiharNight)" height="700" width="900" />
 
-      <g fill="#f6e6c8" opacity=".65">
+      <g className="tihar-stars" fill="#f6e6c8" opacity=".65">
         {tiharStars.map(([x, y, r], index) => (
           <circle key={index} cx={x} cy={y} opacity={index % 3 === 0 ? 0.5 : 0.9} r={r} />
         ))}
@@ -578,6 +610,7 @@ export function TiharScene({ className = '' }) {
 
       <ellipse cx="450" cy="606" fill="url(#tiharFloorGlow)" rx="270" ry="82" />
       <path
+        className="tihar-door"
         d="M355 560V376C355 322 398 300 450 300C502 300 545 322 545 376V560Z"
         fill="url(#tiharDoorGlow)"
         opacity=".92"
@@ -600,7 +633,7 @@ export function TiharScene({ className = '' }) {
         strokeWidth="1.3"
       />
       {garlandFlowers.map(({ x, y, scale, t }, index) => (
-        <g key={index}>
+        <g className="garland-flower" key={index}>
           <ellipse
             cx={x - 7}
             cy={y + 5}
@@ -667,17 +700,22 @@ export function TiharScene({ className = '' }) {
         </g>
       </g>
 
-      <g>
-        <use href="#tiharDiyo" transform="translate(388 558) scale(.82)" />
-        <use href="#tiharDiyo" transform="translate(512 558) scale(.82)" />
-        <use href="#tiharDiyo" transform="translate(282 600) scale(.95)" />
-        <use href="#tiharDiyo" transform="translate(618 600) scale(.95)" />
-        <use href="#tiharDiyo" transform="translate(344 646) scale(.85)" />
-        <use href="#tiharDiyo" transform="translate(556 646) scale(.85)" />
-        <use href="#tiharDiyo" transform="translate(450 668) scale(.78)" />
-        <use href="#tiharDiyo" transform="translate(210 660) scale(.7)" opacity=".85" />
-        <use href="#tiharDiyo" transform="translate(690 660) scale(.7)" opacity=".85" />
-      </g>
+      {tiharDiyas.map(([x, y, scale, opacity]) => (
+        <g
+          className="tihar-diyo"
+          key={`${x}-${y}`}
+          opacity={opacity}
+          transform={`translate(${x} ${y}) scale(${scale})`}
+        >
+          <use href="#tiharDiyoBowl" />
+          <path
+            className="diyo-flame"
+            d="M0-18C-7-11-5-4 0 0C5-4 7-11 0-18Z"
+            fill="url(#tiharFlame)"
+          />
+          <circle cx="0" cy="-1" fill="#3a2415" opacity=".7" r="1.6" />
+        </g>
+      ))}
 
       <g fill="none" opacity=".18" stroke="#f2b84a" strokeWidth="1">
         <path d="M300 590c34-6 66-6 100 0" />
@@ -706,68 +744,98 @@ export function TransitionDiyas({ className = '' }) {
           <stop offset="0" stopColor="#fff5cd" />
           <stop offset="1" stopColor="#f0a94c" />
         </linearGradient>
-        <g id="rowDiyo">
+        <g id="rowDiyoBowl">
           <circle cx="0" cy="-4" fill="url(#rowGlow)" r="24" />
           <path d="M-17 2C-11 12 11 12 17 2C10 8-10 8-17 2Z" fill="#b9712f" />
           <path d="M-14 2C-7-2 7-2 14 2Z" fill="#e3a149" />
-          <path d="M0-16C-6-10-4-3 0 0C4-3 6-10 0-16Z" fill="url(#rowFlame)" />
         </g>
       </defs>
       <path d="M40 108H860" stroke="#ecdcc4" strokeOpacity=".18" strokeWidth="1" />
-      {[0, 1, 2, 3, 4, 5, 6].map((index) => {
-        const x = 90 + index * 120
-        return (
-          <g className="transit-diya" key={index}>
-            <use href="#rowDiyo" transform={`translate(${x} 92)`} />
-            <ellipse cx={x} cy="112" fill="#f2b84a" opacity=".14" rx="24" ry="3" />
-          </g>
-        )
-      })}
+      {[0, 1, 2, 3, 4, 5, 6].map((index) => (
+        <g className="transit-diya" key={index} transform={`translate(${90 + index * 120} 92)`}>
+          <use href="#rowDiyoBowl" />
+          <path
+            className="diyo-flame"
+            d="M0-16C-6-10-4-3 0 0C4-3 6-10 0-16Z"
+            fill="url(#rowFlame)"
+          />
+          <ellipse cx="0" cy="20" fill="#f2b84a" opacity=".14" rx="24" ry="3" />
+        </g>
+      ))}
     </svg>
   )
 }
 
-export function ClosingDiyas({ lit = false, className = '' }) {
+// Declared once by the ritual and shared by all five lamps, so no two SVGs in
+// the document claim the same gradient id.
+export function RitualDefs() {
   return (
     <svg
       aria-hidden="true"
-      className={`closing-diyas ${lit ? 'is-lit' : ''} ${className}`}
-      fill="none"
-      viewBox="0 0 560 130"
+      className="ritual-defs"
+      focusable="false"
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        <radialGradient id="closingGlow">
-          <stop offset="0" stopColor="#ffd784" stopOpacity=".9" />
-          <stop offset=".55" stopColor="#f2b84a" stopOpacity=".28" />
+        <radialGradient id="ritualGlow">
+          <stop offset="0" stopColor="#ffdf9c" stopOpacity=".95" />
+          <stop offset=".45" stopColor="#f2b84a" stopOpacity=".38" />
           <stop offset="1" stopColor="#f2b84a" stopOpacity="0" />
         </radialGradient>
-        <linearGradient id="closingFlame" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stopColor="#fff7d8" />
+        <linearGradient id="ritualFlame" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor="#fff9e2" />
+          <stop offset=".55" stopColor="#ffd27a" />
           <stop offset="1" stopColor="#e9953f" />
         </linearGradient>
-        <g id="closingDiyo">
-          <path d="M-21 2C-14 14 14 14 21 2C13 9-13 9-21 2Z" fill="#8a5a2b" />
-          <path d="M-18 2C-9-3 9-3 18 2Z" fill="#c98a43" />
-          <path
-            className="flame"
-            d="M0-21C-8-13-5-4 0 0C5-4 8-13 0-21Z"
-            fill="url(#closingFlame)"
-          />
-          <circle cx="0" cy="-1" fill="#5b371c" r="1.8" />
-        </g>
+        <linearGradient id="ritualBowl" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor="#c98a43" />
+          <stop offset="1" stopColor="#8a5a2b" />
+        </linearGradient>
       </defs>
-      <path d="M40 108H520" stroke="#9f3f22" strokeOpacity=".2" strokeWidth="1" />
-      {[0, 1, 2, 3, 4].map((index) => {
-        const x = 80 + index * 100
-        return (
-          <g key={index} style={{ '--i': index }}>
-            <circle className="halo" cx={x} cy="66" fill="url(#closingGlow)" r="38" />
-            <use href="#closingDiyo" transform={`translate(${x} 92)`} />
-            <ellipse cx={x} cy="112" fill="#b95f24" opacity=".12" rx="26" ry="3" />
-          </g>
-        )
-      })}
+    </svg>
+  )
+}
+
+export function DiyaLamp({ index, lit }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={`ritual-lamp ${lit ? 'is-lit' : ''}`}
+      data-index={index}
+      fill="none"
+      focusable="false"
+      viewBox="0 0 120 140"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle className="ritual-halo" cx="60" cy="78" fill="url(#ritualGlow)" r="52" />
+      <circle
+        className="ritual-ring"
+        cx="60"
+        cy="96"
+        fill="none"
+        r="30"
+        stroke="#f2b84a"
+        strokeWidth="1.2"
+      />
+      <ellipse
+        className="ritual-shadow"
+        cx="60"
+        cy="120"
+        fill="#b95f24"
+        opacity=".14"
+        rx="34"
+        ry="4.5"
+      />
+      <g transform="translate(60 96)">
+        <path d="M-30 3C-20 20 20 20 30 3C18 13-18 13-30 3Z" fill="url(#ritualBowl)" />
+        <path d="M-26 3C-13-4 13-4 26 3Z" fill="#e0a55c" />
+        <path d="M-22 4C-12 8 12 8 22 4" stroke="#7d4d24" strokeOpacity=".45" strokeWidth="1.2" />
+        <g className="ritual-flame">
+          <path d="M0-31C-11-20-7-6 0 0C7-6 11-20 0-31Z" fill="url(#ritualFlame)" />
+          <path d="M0-20C-4.5-13-3-5 0-1C3-5 4.5-13 0-20Z" fill="#fff6d6" opacity=".85" />
+        </g>
+        <circle cx="0" cy="-1" fill="#5b371c" r="2.2" />
+      </g>
     </svg>
   )
 }
