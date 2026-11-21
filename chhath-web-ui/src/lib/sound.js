@@ -92,11 +92,11 @@ function breath(when) {
   source.start(when)
 }
 
-export function playDiya(index) {
+export function playDiya(index, delay = 0) {
   if (muted) return
   const ctx = context()
   if (!ctx) return
-  const now = ctx.currentTime + 0.01
+  const now = ctx.currentTime + 0.01 + delay
   breath(now)
   bell(NOTES[index % NOTES.length], now + 0.03, 1.9, 0.5)
 }

@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
+import { DiyoMark } from './Scenes'
 
 export default function StartupLoader() {
   const [phase, setPhase] = useState('loading')
 
   useEffect(() => {
-    const exitTimer = window.setTimeout(() => setPhase('exiting'), 1050)
-    const removeTimer = window.setTimeout(() => setPhase('done'), 1500)
+    const delay = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 180 : 520
+    const exitTimer = window.setTimeout(() => setPhase('exiting'), delay)
+    const removeTimer = window.setTimeout(() => setPhase('done'), delay + 350)
 
     return () => {
       window.clearTimeout(exitTimer)
@@ -21,11 +23,15 @@ export default function StartupLoader() {
       className={`startup-loader ${phase === 'exiting' ? 'is-exiting' : ''}`}
       role="status"
     >
-      <div aria-hidden="true" className="startup-spinner">
-        {Array.from({ length: 8 }, (_, index) => (
-          <span key={index} />
-        ))}
+      <div className="startup-brand">
+        <DiyoMark className="startup-brand-mark" size={42} />
+        <span>
+          Chhath <em>&amp;</em> Tihar
+        </span>
       </div>
+      <span aria-hidden="true" className="startup-progress">
+        <span />
+      </span>
       <span className="sr-only">Loading Chhath and Tihar</span>
     </div>
   )

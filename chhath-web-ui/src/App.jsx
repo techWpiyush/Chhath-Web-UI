@@ -124,19 +124,20 @@ export default function App() {
             return gsap
               .timeline({ paused: true, repeat: -1, yoyo: true, delay: -(index * 0.29) })
               .to(flame, {
-                duration: 0.68 + (index % 5) * 0.15,
+                duration: 0.5 + (index % 4) * 0.12,
                 ease: 'sine.inOut',
                 opacity: 1,
-                scaleX: 0.93,
-                scaleY: 1.16,
+                rotation: index % 2 ? 3.8 : -3.8,
+                scaleX: 0.88,
+                scaleY: 1.28,
               })
               .to(flame, {
-                duration: 0.54 + (index % 3) * 0.19,
+                duration: 0.38 + (index % 3) * 0.12,
                 ease: 'sine.inOut',
-                opacity: 0.82,
-                rotation: index % 2 ? 2.4 : -2.4,
-                scaleX: 1.05,
-                scaleY: 0.9,
+                opacity: 0.72,
+                rotation: index % 2 ? -3.2 : 3.2,
+                scaleX: 1.1,
+                scaleY: 0.8,
               })
           }),
           trigger,
@@ -168,7 +169,9 @@ export default function App() {
         )
       }
 
-      const heroTimeline = gsap.timeline({ defaults: { ease: 'power3.out' } })
+      const heroTimeline = gsap.timeline({
+        defaults: { ease: 'power3.out', immediateRender: false },
+      })
       heroTimeline
         .from('.hero-kicker', { autoAlpha: 0, y: 14, duration: 0.7 }, 0.1)
         .from('.hero-title .line', { autoAlpha: 0, yPercent: 55, duration: 1.1, stagger: 0.12 }, 0.2)
@@ -188,6 +191,7 @@ export default function App() {
           autoAlpha: 0,
           duration: 0.95,
           ease: 'power2.out',
+          immediateRender: false,
           scrollTrigger: { once: true, start: 'top 88%', trigger: element },
           y: 30,
         })
@@ -201,6 +205,7 @@ export default function App() {
           autoAlpha: 0,
           duration: 0.82,
           ease: 'power2.out',
+          immediateRender: false,
           scrollTrigger: { once: true, start: 'top 86%', trigger: group },
           stagger: 0.09,
           y: 26,
@@ -214,7 +219,13 @@ export default function App() {
       })
 
       const betweenTimeline = gsap.timeline({
-        scrollTrigger: { end: 'bottom 55%', scrub: 0.6, start: 'top 78%', trigger: '#between' },
+        scrollTrigger: {
+          end: 'bottom 55%',
+          invalidateOnRefresh: true,
+          scrub: 0.6,
+          start: 'top 78%',
+          trigger: '#between',
+        },
       })
 
       betweenTimeline
@@ -222,8 +233,19 @@ export default function App() {
         .fromTo('.night-wash', { opacity: 0 }, { ease: 'none', opacity: 1 }, 0)
         .fromTo(
           '.between-sun',
-          { opacity: 1, scale: 1, yPercent: 0 },
-          { ease: 'none', opacity: 0.45, scale: 0.88, yPercent: 55 },
+          { filter: 'brightness(1) saturate(1)', opacity: 1, scale: 1, yPercent: 0 },
+          {
+            ease: 'none',
+            filter: 'brightness(0.42) saturate(0.72)',
+            opacity: 0.65,
+            scale: 0.88,
+            y: () => {
+              const section = root.querySelector('#between')
+              const sun = root.querySelector('.between-sun')
+              if (!section || !sun) return 0
+              return section.clientHeight - window.innerHeight * 0.1 - sun.offsetTop - sun.offsetHeight
+            },
+          },
           0,
         )
         .fromTo(
