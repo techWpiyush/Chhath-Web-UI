@@ -1,16 +1,47 @@
-# React + Vite
+# Chhath & Tihar
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+An interactive, story-driven introduction to Chhath and Tihar, connecting their shared themes of light, gratitude, and belonging. Illustrated festival guides, animated sunrise-to-dusk transitions, and a sound-enabled diya-lighting ritual bring the traditions to life.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Scroll through a visual story from Chhath's river and sun to Tihar's lamps and doorways.
+- Explore festival traditions and the days of Chhath and Tihar.
+- Light five interactive diyas, with optional sound.
+- Responsive navigation and reduced-motion support.
 
-## React Compiler
+## Tech stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React and Vite
+- GSAP for scroll-based and scene animations
+- Tailwind CSS
+- Web Audio API for optional diya sounds
 
-## Expanding the Oxlint configuration
+## Getting started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+From this directory, install dependencies and start the development server:
+
+```sh
+npm install
+npm run dev
+```
+
+## Scripts
+
+```sh
+npm run dev      # Start the local development server
+npm run build    # Create a production build in dist/
+npm run preview  # Preview the production build locally
+npm run lint     # Lint the project
+```
+
+## Deploying to Vercel
+
+Import the GitHub repository into Vercel and configure:
+
+- **Root Directory:** `chhath-web-ui`
+- **Framework Preset:** Vite
+- **Build Command:** `npm run build`
+- **Output Directory:** `dist`
+- **Install Command:** `npm install`
+
+The current app does not require environment variables.
