@@ -42,9 +42,9 @@ export default function LightRitual() {
         const halo = lamp.querySelector('.ritual-halo')
         return gsap
           .timeline({ paused: true, repeat: -1, yoyo: true, defaults: { ease: 'sine.inOut' } })
-          .to(flame, { scaleY: 1.11, scaleX: 0.95, duration: 0.82 + index * 0.14 }, 0)
-          .to(flame, { scaleY: 0.94, scaleX: 1.05, duration: 0.66 + index * 0.1 }, '>-0.05')
-          .to(halo, { opacity: 0.76, duration: 1.2 + index * 0.16 }, 0)
+          .to(flame, { rotation: 2.8, scaleY: 1.18, scaleX: 0.91, duration: 0.58 + index * 0.1 }, 0)
+          .to(flame, { rotation: -2.2, scaleY: 0.88, scaleX: 1.06, duration: 0.46 + index * 0.08 }, '>-0.05')
+          .to(halo, { opacity: 0.96, scale: 1.1, duration: 0.8 + index * 0.12 }, 0)
       })
 
       const firstRing = lampRefs.current[0]?.querySelector('.ritual-ring')

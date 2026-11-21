@@ -563,13 +563,34 @@ export default function App() {
               {themes.map((theme, index) => {
                 const Icon = themeIcons[theme.id]
                 return (
-                  <article className="theme glass-card" data-reveal-item key={theme.id}>
-                    <div className="theme-head">
-                      <Icon aria-hidden="true" size={22} strokeWidth={1.5} />
-                      <span className="theme-num">{String(index + 1).padStart(2, '0')}</span>
+                  <article
+                    aria-label={`${theme.title} theme. Focus or hover to reveal its description.`}
+                    className="theme-card"
+                    data-reveal-item
+                    key={theme.id}
+                    tabIndex={0}
+                  >
+                    <div className="theme-card-inner">
+                      <div className="theme-card-face theme-card-front">
+                        <span aria-hidden="true" className="theme-card-orb theme-card-orb--large" />
+                        <span aria-hidden="true" className="theme-card-orb theme-card-orb--small" />
+                        <div className="theme-card-heading">
+                          <Icon aria-hidden="true" size={25} strokeWidth={1.5} />
+                          <span className="theme-num">{String(index + 1).padStart(2, '0')}</span>
+                        </div>
+                        <div className="theme-card-front-copy">
+                          <h3 className="card-title">{theme.title}</h3>
+                          <span>Hover or focus to explore</span>
+                        </div>
+                      </div>
+                      <div className="theme-card-face theme-card-back">
+                        <span className="eyebrow">A shared thread</span>
+                        <p className="copy-sm">{theme.text}</p>
+                        <span aria-hidden="true" className="theme-card-back-mark">
+                          <Icon size={20} strokeWidth={1.5} />
+                        </span>
+                      </div>
                     </div>
-                    <h3 className="card-title">{theme.title}</h3>
-                    <p className="copy-sm">{theme.text}</p>
                   </article>
                 )
               })}
