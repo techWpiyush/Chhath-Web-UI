@@ -831,9 +831,9 @@ export default function App() {
           <div aria-hidden="true" className="closing-ornament" />
           <Embers className="closing-embers" count={12} seed={47} />
           <div className="shell relative z-10 text-center">
-            <p className="eyebrow text-ember-600">A closing wish</p>
+            <p className="eyebrow text-wine-700">A closing wish</p>
             <h2 className="section-title mx-auto mt-5 max-w-3xl" data-reveal id="light-title">
-              Carry <span className="serif-italic text-ember-500">the light.</span>
+              Carry <span className="serif-italic text-wine-700">the light.</span>
             </h2>
             <p className="lead mx-auto mt-6 max-w-2xl text-ink-900/70" data-reveal>
               Chhath teaches us to look up. Tihar reminds us to come home. Between the two, a simple
