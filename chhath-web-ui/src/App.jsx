@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 import { ArrowDown, ArrowRight, ArrowUp, Check, Flame, Leaf, Link2, Plus, Sun } from 'lucide-react'
 import Navbar from './components/Navbar'
+import StartupLoader from './components/StartupLoader'
 import LightRitual from './components/LightRitual'
 import { Embers } from './components/Atmosphere'
 import {
@@ -447,6 +448,7 @@ export default function App() {
 
   return (
     <div ref={rootRef}>
+      <StartupLoader />
       <a className="skip-link" href="#main">
         Skip to content
       </a>
